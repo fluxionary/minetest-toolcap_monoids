@@ -39,7 +39,9 @@ toolcap_monoids.dig_speed = item_monoids.make_monoid("dig_speed", {
 	fold = function(values, default_dig_speeds)
 		local dig_speeds = table.copy(default_dig_speeds)
 		for _, multiplier in pairs(values) do
-			if type(multiplier) == "number" then
+			if multiplier == "disable" then
+				dig_speeds = {}
+			elseif type(multiplier) == "number" then
 				for _, times in pairs(dig_speeds) do
 					for i = 1, #times do
 						times[i] = times[i] * multiplier
@@ -47,10 +49,14 @@ toolcap_monoids.dig_speed = item_monoids.make_monoid("dig_speed", {
 				end
 			elseif type(multiplier) == "table" then
 				for group, group_multiplier in pairs(multiplier) do
-					local times = dig_speeds[group]
-					if times then
-						for i = 1, #times do
-							times[i] = times[i] * group_multiplier
+					if group_multiplier == "disable" then
+						dig_speeds[group] = nil
+					else
+						local times = dig_speeds[group]
+						if times then
+							for i = 1, #times do
+								times[i] = times[i] * group_multiplier
+							end
 						end
 					end
 				end
@@ -125,13 +131,26 @@ toolcap_monoids.damage = item_monoids.make_monoid("damage", {
 	fold = function(values, default_damage_groups)
 		local damage_groups = table.copy(default_damage_groups)
 		for _, additional_damage in pairs(values) do
-			for group, damage in pairs(additional_damage) do
-				local total_damage = damage_groups[group] + damage
-				if total_damage == 0 then
-					damage_groups[group] = nil
-				else
-					damage_groups[group] = total_damage
+			if additional_damage == "disable" then
+				return {}
+			else
+				for group, damage in pairs(additional_damage) do
+					if damage == "disable" then
+						damage_groups[group] = "disabled"
+					elseif damage_groups[group] ~= "disabled" then
+						local total_damage = (damage_groups[group] or 0) + damage
+						if total_damage == 0 then
+							damage_groups[group] = nil
+						else
+							damage_groups[group] = total_damage
+						end
+					end
 				end
+			end
+		end
+		for group, value in pairs(damage_groups) do
+			if value == "disabled" then
+				damage_groups[group] = nil
 			end
 		end
 		return damage_groups
