@@ -49,8 +49,6 @@ toolcap_monoids.dig_speed = item_monoids.make_monoid("dig_speed", {
 			end
 			tool_capabilities.groupcaps[group].times = times
 		end
-		item_monoids.chat_send_all("[DEBUG] @1", dump(dig_speeds))
-		item_monoids.chat_send_all("[DEBUG] @1", dump(tool_capabilities))
 		local meta = toolstack:get_meta()
 		meta:set_tool_capabilities(tool_capabilities)
 	end,
