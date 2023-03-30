@@ -36,11 +36,29 @@ toolcap_monoids.dig_speed = item_monoids.make_monoid("dig_speed", {
 		end
 		return dig_speeds
 	end,
+	apply = function(dig_speeds, toolstack)
+		local tool_capabilities = table.copy(toolstack:get_tool_capabilities())
+		for group in pairs(tool_capabilities.groupcaps) do
+			if not dig_speeds[group] then
+				tool_capabilities.groupcaps[group] = nil
+			end
+		end
+		for group, times in pairs(dig_speeds) do
+			if not tool_capabilities.groupcaps[group] then
+				tool_capabilities.groupcaps[group] = {}
+			end
+			tool_capabilities.groupcaps[group].times = times
+		end
+		item_monoids.chat_send_all("[DEBUG] @1", dump(dig_speeds))
+		item_monoids.chat_send_all("[DEBUG] @1", dump(tool_capabilities))
+		local meta = toolstack:get_meta()
+		meta:set_tool_capabilities(tool_capabilities)
+	end,
 	fold = function(values, default_dig_speeds)
 		local dig_speeds = table.copy(default_dig_speeds)
 		for _, multiplier in pairs(values) do
 			if multiplier == "disable" then
-				dig_speeds = {}
+				return {}
 			elseif type(multiplier) == "number" then
 				for _, times in pairs(dig_speeds) do
 					for i = 1, #times do
@@ -63,14 +81,6 @@ toolcap_monoids.dig_speed = item_monoids.make_monoid("dig_speed", {
 			end
 		end
 		return dig_speeds
-	end,
-	apply = function(dig_speeds, toolstack)
-		local tool_capabilities = toolstack:get_tool_capabilities()
-		for group, times in pairs(dig_speeds) do
-			tool_capabilities.groupcaps[group] = times
-		end
-		local meta = toolstack:get_meta()
-		meta:set_tool_capabilities(tool_capabilities)
 	end,
 })
 
