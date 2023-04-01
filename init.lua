@@ -45,7 +45,12 @@ toolcap_monoids.dig_speed = item_monoids.make_monoid("dig_speed", {
 		end
 		for group, times in pairs(dig_speeds) do
 			if not tool_capabilities.groupcaps[group] then
-				tool_capabilities.groupcaps[group] = {}
+				local default_caps = toolstack:get_definition().tool_capabilities.groupcaps[group]
+				if default_caps then
+					tool_capabilities.groupcaps[group] = table.copy(default_caps)
+				else
+					tool_capabilities.groupcaps[group] = {}
+				end
 			end
 			tool_capabilities.groupcaps[group].times = times
 		end
@@ -85,7 +90,19 @@ toolcap_monoids.dig_speed = item_monoids.make_monoid("dig_speed", {
 toolcap_monoids.durability = item_monoids.make_monoid("durability", {
 	predicate = function(toolstack)
 		local toolcaps = toolstack:get_definition().tool_capabilities
-		return toolcaps and (toolcaps.groupcaps or toolcaps.punch_attack_uses)
+		if toolcaps then
+			if toolcaps.punch_attack_uses and toolcaps.punch_attack_uses > 0 then
+				return true
+			end
+			if toolcaps.groupcaps then
+				for group, caps in pairs(toolcaps.groupcaps) do
+					if caps.uses then
+						return true
+					end
+				end
+			end
+		end
+		return false
 	end,
 	get_default = function(toolstack)
 		local toolcaps = toolstack:get_definition().tool_capabilities
