@@ -44,15 +44,17 @@ toolcap_monoids.dig_speed = item_monoids.make_monoid("dig_speed", {
 			end
 		end
 		for group, times in pairs(dig_speeds) do
-			if not tool_capabilities.groupcaps[group] then
+			local groupcap = tool_capabilities.groupcaps[group]
+			if not groupcap then
 				local default_caps = toolstack:get_definition().tool_capabilities.groupcaps[group]
 				if default_caps then
-					tool_capabilities.groupcaps[group] = table.copy(default_caps)
+					groupcap = table.copy(default_caps)
 				else
-					tool_capabilities.groupcaps[group] = {}
+					groupcap = {}
 				end
+				tool_capabilities.groupcaps[group] = groupcap
 			end
-			tool_capabilities.groupcaps[group].times = times
+			groupcap.times = times
 		end
 		local meta = toolstack:get_meta()
 		meta:set_tool_capabilities(tool_capabilities)
@@ -164,7 +166,7 @@ toolcap_monoids.damage = item_monoids.make_monoid("damage", {
 						damage_groups[group] = "disabled"
 					elseif damage_groups[group] ~= "disabled" then
 						local total_damage = (damage_groups[group] or 0) + damage
-						if total_damage == 0 then
+						if total_damage <= 0 then
 							damage_groups[group] = nil
 						else
 							damage_groups[group] = total_damage
