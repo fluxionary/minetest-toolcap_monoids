@@ -7,5 +7,5 @@
     "repo": "https://github.com/fluxionary/minetest-toolcap_monoids.git",
     "website": "https://github.com/fluxionary/minetest-toolcap_monoids",
     "issue_tracker": "https://github.com/fluxionary/minetest-toolcap_monoids/issues",
-    "short_description": "TODO: write a description"
+    "short_description": "an API to allow multiple sources to apply changes to a tools's capabilities."
 }
